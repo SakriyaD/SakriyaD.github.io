@@ -6,18 +6,25 @@
   <div class="blob blob-2"></div>
 
   <div class="container hero-content">
-    <span class="badge">Welcome to my portfolio</span>
-    <h1>
-      Building Digital <br>
-      <span class="text-gradient typing-cursor">{{ heroText() }}</span>
-    </h1>
-    <p class="hero-description animate-on-scroll" #animateItem>
-      I'm a passionate web developer transforming ideas into reality through code.
-      Specializing in Angular and modern web technologies.
-    </p>
-    <div class="hero-actions animate-on-scroll delay-100" #animateItem>
-      <a href="#projects" class="btn-primary">View My Work</a>
-      <a href="assets/resume.pdf" download class="btn-secondary">Download CV</a>
+    <div class="hero-text">
+      <span class="badge">Welcome to my portfolio</span>
+      <h1>
+        Building Digital <br>
+        <span class="text-gradient typing-cursor">{{ heroText() }}</span>
+      </h1>
+      <p class="hero-description animate-on-scroll" #animateItem>
+        I'm a passionate web developer transforming ideas into reality through code.
+        Specializing in Angular and modern web technologies.
+      </p>
+      <div class="hero-actions animate-on-scroll delay-100" #animateItem>
+        <a href="#projects" class="btn-primary">View My Work</a>
+        <a href="resume.pdf" download class="btn-secondary">Download Resume</a>
+      </div>
+    </div>
+    <div class="hero-portrait animate-on-scroll delay-200" #animateItem>
+      <div class="portrait-ring">
+        <img src="portrait2.png" alt="Sakriya" class="portrait-img">
+      </div>
     </div>
   </div>
 </header>
@@ -107,10 +114,11 @@
       <div class="timeline-item left animate-on-scroll" #animateItem>
         <div class="timeline-dot"></div>
         <div class="timeline-content glass">
-          <span class="date">2022 - Present</span>
-          <h3>Senior Frontend Developer</h3>
-          <h4>Tech Solutions Inc.</h4>
-          <p>Leading the frontend team in building scalable web applications using Angular and RxJS.</p>
+          <span class="date">2026 - Present</span>
+          <h3>Frontend Developer Intern</h3>
+          <h4>IMS Software · Kathmandu, Nepal</h4>
+          <p>Building and maintaining web applications using Angular and TypeScript. Working on real-world client
+            projects in a professional team environment.</p>
         </div>
       </div>
 
@@ -118,10 +126,10 @@
       <div class="timeline-item right animate-on-scroll delay-100" #animateItem>
         <div class="timeline-dot"></div>
         <div class="timeline-content glass">
-          <span class="date">2020 - 2022</span>
-          <h3>Web Developer</h3>
-          <h4>Creative Agency</h4>
-          <p>Developed responsive websites and landing pages for diverse clients using modern web technologies.</p>
+          <span class="date">2021 - 2026</span>
+          <h3>Bachelor of Computer Applications (BCA)</h3>
+          <h4>Final Semester · Nepal</h4>
+          <p>Pursuing a BCA degree with a focus on software development and web technologies. Graduating in 2026.</p>
         </div>
       </div>
 
@@ -129,10 +137,11 @@
       <div class="timeline-item left animate-on-scroll delay-200" #animateItem>
         <div class="timeline-dot"></div>
         <div class="timeline-content glass">
-          <span class="date">2016 - 2020</span>
-          <h3>Bachelor of Computer Science</h3>
-          <h4>University of Technology</h4>
-          <p>Graduated with honors. Specialized in Software Engineering and Human-Computer Interaction.</p>
+          <span class="date">2022</span>
+          <h3>JavaScript Training</h3>
+          <h4>Professional Course</h4>
+          <p>Completed a dedicated JavaScript training program, building a strong foundation in modern JS concepts, DOM
+            manipulation, and asynchronous programming.</p>
         </div>
       </div>
 
@@ -171,7 +180,7 @@
         <div class="contact-details">
           <div class="contact-item">
             <span class="icon">📧</span>
-            <a href="mailto:sakriya003@gmail.com</">sakriya003@gmail.com</a>
+            <a href="mailto:sakriya003@gmail.com">sakriya003@gmail.com</a>
           </div>
           <div class="contact-item">
             <span class="icon">📍</span>
@@ -179,20 +188,31 @@
           </div>
         </div>
       </div>
-      <form class="contact-form">
+      <form class="contact-form" (ngSubmit)="sendMessage($event)">
         <div class="form-group">
           <label for="name">Name</label>
-          <input type="text" id="name" placeholder="Your Name" required>
+          <input type="text" id="name" placeholder="Your Name" required [(ngModel)]="formData.name" name="name">
         </div>
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" id="email" placeholder="your@email.com" required>
+          <input type="email" id="email" placeholder="your@email.com" required [(ngModel)]="formData.email"
+            name="email">
         </div>
         <div class="form-group">
           <label for="message">Message</label>
-          <textarea id="message" rows="4" placeholder="How can I help you?" required></textarea>
+          <textarea id="message" rows="4" placeholder="How can I help you?" required [(ngModel)]="formData.message"
+            name="message"></textarea>
         </div>
-        <button type="submit" class="btn-primary">Send Message</button>
+        <button type="submit" class="btn-primary" [disabled]="isLoading()">
+          <span *ngIf="!isLoading()">Send Message</span>
+          <span *ngIf="isLoading()" class="btn-loading">Sending…</span>
+        </button>
+        <div *ngIf="formStatus() === 'success'" class="form-feedback success">
+          ✅ Message sent! I'll get back to you soon.
+        </div>
+        <div *ngIf="formStatus() === 'error'" class="form-feedback error">
+          ❌ Something went wrong. Please try again or email me directly.
+        </div>
       </form>
     </div>
   </div>
@@ -218,7 +238,7 @@
       <a href="https://github.com/SakriyaD" target="_blank">GitHub</a>
       <a href="https://www.linkedin.com/in/sakriya-dangol-87ba81234/" target="_blank">LinkedIn</a>
       <a href="mailto:sakriya003@gmail.com">Email</a>
-      <a href="assets/resume.pdf" download>Resume</a>
+      <a href="resume.pdf" download>Resume</a>
     </div>
   </div>
   <div class="footer-bottom">

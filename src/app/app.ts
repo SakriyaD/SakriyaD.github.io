@@ -1,13 +1,15 @@
 import { Component, signal, Inject, PLATFORM_ID, ViewChildren, QueryList, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { NavBar } from './nav-bar/nav-bar';
 import { ProjectModal, Project } from './project-modal/project-modal';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, NavBar, ProjectModal],
+  imports: [CommonModule, RouterOutlet, NavBar, ProjectModal, FormsModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -25,6 +27,13 @@ export class App implements AfterViewInit {
 
   // Project Modal
   selectedProject = signal<Project | null>(null);
+
+  // Contact form
+  // ⚠️ Replace 'YOUR_FORM_ID' with your actual Formspree form ID after signing up at formspree.io
+  private FORMSPREE_URL = 'https://formspree.io/f/xojnplaw';
+  formData = { name: '', email: '', message: '' };
+  isLoading = signal(false);
+  formStatus = signal<'idle' | 'success' | 'error'>('idle');
 
   projects: Project[] = [
     {
@@ -56,7 +65,10 @@ export class App implements AfterViewInit {
     }
   ];
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private http: HttpClient
+  ) { }
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
@@ -74,6 +86,27 @@ export class App implements AfterViewInit {
   closeProject() {
     this.selectedProject.set(null);
     document.body.style.overflow = ''; // Restore scrolling
+  }
+
+  sendMessage(event: Event) {
+    event.preventDefault();
+    if (this.isLoading()) return;
+    this.isLoading.set(true);
+    this.formStatus.set('idle');
+
+    this.http.post(this.FORMSPREE_URL, this.formData, {
+      headers: { 'Accept': 'application/json' }
+    }).subscribe({
+      next: () => {
+        this.formStatus.set('success');
+        this.formData = { name: '', email: '', message: '' };
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.formStatus.set('error');
+        this.isLoading.set(false);
+      }
+    });
   }
 
   private initScrollListener() {
