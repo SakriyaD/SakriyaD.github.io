@@ -1,4 +1,4 @@
-import { Component, signal, Inject, PLATFORM_ID, ViewChildren, QueryList, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, signal, Inject, PLATFORM_ID, ViewChildren, ViewChild, QueryList, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -18,9 +18,11 @@ export class App implements AfterViewInit {
 
   // Typed text signal
   heroText = signal('');
-  private fullText = 'Experiences That Matter';
+  private fullText = 'Experiences Worth Remembering.';
 
   @ViewChildren('animateItem') animateItems!: QueryList<ElementRef>;
+  @ViewChild('cursorOuter') cursorOuter!: ElementRef<HTMLDivElement>;
+  @ViewChild('cursorDot') cursorDot!: ElementRef<HTMLDivElement>;
 
   // Back to top signal
   showBackToTop = signal(false);
@@ -29,7 +31,6 @@ export class App implements AfterViewInit {
   selectedProject = signal<Project | null>(null);
 
   // Contact form
-  // ⚠️ Replace 'YOUR_FORM_ID' with your actual Formspree form ID after signing up at formspree.io
   private FORMSPREE_URL = 'https://formspree.io/f/xojnplaw';
   formData = { name: '', email: '', message: '' };
   isLoading = signal(false);
@@ -75,6 +76,7 @@ export class App implements AfterViewInit {
       this.initIntersectionObserver();
       this.startTypingEffect();
       this.initScrollListener();
+      this.initCursorFollower();
     }
   }
 
@@ -88,6 +90,10 @@ export class App implements AfterViewInit {
     document.body.style.overflow = ''; // Restore scrolling
   }
 
+  /**
+   * Handles contact form submission via Formspree.
+   * Uses Angular HttpClient to POST form data.
+   */
   sendMessage(event: Event) {
     event.preventDefault();
     if (this.isLoading()) return;
@@ -99,7 +105,7 @@ export class App implements AfterViewInit {
     }).subscribe({
       next: () => {
         this.formStatus.set('success');
-        this.formData = { name: '', email: '', message: '' };
+        this.formData = { name: '', email: '', message: '' }; // Reset form
         this.isLoading.set(false);
       },
       error: () => {
@@ -107,6 +113,65 @@ export class App implements AfterViewInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  /**
+   * Initializes the dual cursor effect.
+   * 'dot' follows the mouse instantly.
+   * 'outer' follows with a 'Lerp' (Linear Interpolation) lag for a smooth trail.
+   */
+  private initCursorFollower() {
+    // Disable on touch devices (mobile/tablets)
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+
+    const outer = this.cursorOuter.nativeElement;
+    const dot = this.cursorDot.nativeElement;
+    let mouseX = 0, mouseY = 0; // Current mouse coordinates
+    let outerX = 0, outerY = 0; // Current outer ring coordinates
+
+    // Update coordinates on mouse move
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      outer.style.opacity = '1';
+
+      // Dot tracks the mouse pointer instantly
+      dot.style.opacity = '1';
+      dot.style.transform = `translate(-50%, -50%) translate(${mouseX}px, ${mouseY}px)`;
+    });
+
+    // Hide custom cursor when mouse leaves the window
+    document.addEventListener('mouseleave', () => {
+      outer.style.opacity = '0';
+      dot.style.opacity = '0';
+    });
+
+    // Handle cursor expansion on hover of interactive elements
+    const hoverTargets = 'a, button, [role="button"], input, textarea, label';
+    document.addEventListener('mouseover', (e) => {
+      if ((e.target as Element).closest(hoverTargets)) {
+        outer.classList.add('cursor--hover');
+      }
+    });
+    document.addEventListener('mouseout', (e) => {
+      if ((e.target as Element).closest(hoverTargets)) {
+        outer.classList.remove('cursor--hover');
+      }
+    });
+
+    /**
+     * Animation loop for the lagging outer cursor.
+     * Uses Lerp: current = current + (target - current) * factor
+     */
+    const animate = () => {
+      // 0.12 is the 'snappiness' factor (lower = more lag)
+      outerX += (mouseX - outerX) * 0.12;
+      outerY += (mouseY - outerY) * 0.12;
+      outer.style.transform = `translate(-50%, -50%) translate(${outerX}px, ${outerY}px)`;
+
+      requestAnimationFrame(animate);
+    };
+    animate();
   }
 
   private initScrollListener() {
@@ -119,18 +184,20 @@ export class App implements AfterViewInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  /**
+   * Intersection Observer for scroll-based animations.
+   * Adds 'is-visible' class when elements enter the viewport.
+   */
   private initIntersectionObserver() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
-          // Optional: Stop observing once visible
-          // observer.unobserve(entry.target);
         }
       });
     }, {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
+      threshold: 0.1, // Trigger when 10% of element is visible
+      rootMargin: '0px 0px -50px 0px' // Slightly early trigger point
     });
 
     this.animateItems.forEach(item => {

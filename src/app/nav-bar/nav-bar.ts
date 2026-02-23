@@ -11,6 +11,7 @@ export class NavBar {
   isMenuOpen = signal(false);
   isDarkTheme = signal(true);
   activeSection = signal<string>('home');
+  scrollProgress = signal<number>(0);
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     // Check for saved theme preference or system preference
@@ -27,13 +28,33 @@ export class NavBar {
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.initScrollSpy();
+      this.initScrollProgress();
     }
   }
 
+  /**
+   * Calculates what percentage of the page has been scrolled.
+   * Used for the top progress bar.
+   */
+  private initScrollProgress() {
+    const update = () => {
+      const scrollTop = window.scrollY; // Current scroll position
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight; // Total scrollable height
+      this.scrollProgress.set(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0);
+    };
+    window.addEventListener('scroll', update, { passive: true });
+  }
+
+  /**
+   * Intersection Observer for 'Scroll Spy'.
+   * Detects which section is currently centered on screen to highlight the active menu link.
+   */
   private initScrollSpy() {
     const sections = document.querySelectorAll('section, header');
     const options = {
-      rootMargin: '-30% 0px -70% 0px' // Trigger when section is near top
+      // rootMargin adjusts the detection area: -30% from top, -70% from bottom
+      // This ensures only sections near the top-middle trigger the update.
+      rootMargin: '-30% 0px -70% 0px'
     };
 
     const observer = new IntersectionObserver((entries) => {

@@ -1,3 +1,76 @@
+/* 
+   Dual Cursor Follower: Outer Ring
+   Lagging element that follows the mouse with a smooth 'lerp' delay.
+   Uses transform: translate for high performance (GPU accelerated).
+*/
+.dsn-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #38bdf8;
+    background: transparent;
+    pointer-events: none;
+    /* Prevents cursor from blocking clicks */
+    z-index: 9999;
+    opacity: 0;
+    will-change: transform;
+    transition: width 0.25s ease, height 0.25s ease,
+        background 0.25s ease, border-color 0.25s ease,
+        opacity 0.3s ease;
+}
+
+/* Hover state: Triggered via JS when hovering buttons/links */
+.dsn-cursor.cursor--hover {
+    width: 50px;
+    height: 50px;
+    background: rgba(56, 189, 248, 0.15);
+    /* Translucent fill */
+    border-color: transparent;
+}
+
+@media (pointer: coarse) {
+    .dsn-cursor {
+        display: none;
+    }
+}
+
+/* 
+   Global override to hide the default browser cursor.
+   Only active on devices with a 'fine' pointer (mouse).
+*/
+@media (pointer: fine) {
+    * {
+        cursor: none !important;
+    }
+}
+
+/* 
+   Instant Dot Cursor
+   Small center point that tracks the mouse with zero delay.
+*/
+.dsn-cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #38bdf8;
+    pointer-events: none;
+    z-index: 10000;
+    opacity: 0;
+    will-change: transform;
+}
+
+@media (pointer: coarse) {
+    .dsn-cursor-dot {
+        display: none;
+    }
+}
+
 /* Hero Section */
 .hero-section {
     position: relative;
@@ -419,6 +492,14 @@ h1 {
     color: var(--text-primary);
     border: 1px solid var(--glass-border);
     transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.skill-icon {
+    font-size: 1rem;
+    line-height: 1;
 }
 
 .skill-tag:hover {

@@ -54,7 +54,8 @@ nav {
     transition: width 0.3s ease;
 }
 
-.nav-link:not(.btn-primary):hover::after {
+.nav-link:not(.btn-primary):hover::after,
+.nav-link:not(.btn-primary).active::after {
     width: 100%;
 }
 
@@ -147,4 +148,20 @@ nav {
 .theme-toggle:hover {
     background-color: rgba(255, 255, 255, 0.1);
     transform: rotate(15deg);
+}
+
+/*
+   Scroll Progress Bar
+   A thin line at the bottom of the sticky nav that fills as you scroll.
+   Positioned absolutely relative to the sticky host.
+*/
+.scroll-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: var(--gradient-primary);
+    transition: width 0.1s linear;
+    /* Smooth fill transition */
+    border-radius: 0 2px 2px 0;
 }
